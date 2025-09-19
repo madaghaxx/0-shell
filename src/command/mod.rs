@@ -8,7 +8,11 @@ impl Command {
     pub fn cp(args: &[&str]) {
         cp::cp(args);
     }
+    pub fn mv(args: &[&str]) {
+        mv::mv(args);
+    }
 }
 
 mod rm;
 mod cp;
+mod mv;

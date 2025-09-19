@@ -25,6 +25,7 @@ fn main() {
                     match command {
                         "rm" => Command::rm(args),
                         "cp" => Command::cp(args),
+                        "mv" => Command::mv(args),
                         _ => println!("Command not found '{command}'"),
                     }
                 }
