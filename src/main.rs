@@ -1,6 +1,5 @@
 use std::io::{ self, BufRead, Write };
 mod command;
-use crate::command::Command;
 fn main() {
     loop {
         print!("$ ");
@@ -20,13 +19,10 @@ fn main() {
             _ => {
                 let parts: Vec<&str> = input.split_whitespace().collect();
                 if !parts.is_empty() {
-                    let command = parts[0];
+                    let name = parts[0];
                     let args = &parts[1..];
-                    match command {
-                        "rm" => Command::rm(args),
-                        "cp" => Command::cp(args),
-                        "mv" => Command::mv(args),
-                        _ => println!("Command not found '{command}'"),
+                    if !crate::command::dispatch(name, args) {
+                        println!("Command not found '{name}'");
                     }
                 }
             }

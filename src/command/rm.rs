@@ -1,34 +1,46 @@
 use std::fs;
+use std::path::Path;
+use crate::command::util::{ expand_path, require_min_args };
+
 pub fn rm(args: &[&str]) {
-    if args.is_empty() {
-        println!("rm: missing operand");
+    if !require_min_args("rm", args, 1, "missing operand") {
         return;
     }
-    let mut recursive = false;
-    let mut files = Vec::new();
-
-    for arg in args {
-        if arg == &"-r" || arg == &"--recursive" {
-            recursive = true;
-        } else {
-            files.push(*arg);
-        }
-    }
-    for arg in files {
-        let path = std::path::Path::new(arg);
+    let (recursive, file_args) = parse_flags(args);
+    for raw in file_args {
+        let path = expand_path(raw);
         let result = if path.is_dir() {
             if recursive {
-                fs::remove_dir_all(arg)
+                remove_dir_all(&path)
             } else {
-                println!("rm: cannot remove '{}': Is a directory", arg);
-                continue;
+                Err(std::io::Error::new(std::io::ErrorKind::Other, "is a directory"))
             }
         } else {
-            fs::remove_file(arg)
+            fs::remove_file(&path)
         };
 
         if let Err(e) = result {
-            println!("rm: cannot remove '{}': {}", arg, e);
+            eprintln!("rm: cannot remove '{}': {}", raw, e);
         }
     }
+}
+fn parse_flags<'a>(args: &'a [&'a str]) -> (bool, &'a [&'a str]) {
+    let mut recursive = false;
+    let mut idx = 0;
+    while idx < args.len() && args[idx].starts_with('-') {
+        for ch in args[idx][1..].chars() {
+            match ch {
+                'r' | 'R' => {
+                    recursive = true;
+                }
+                _ => {}
+            }
+        }
+        idx += 1;
+    }
+    (recursive, &args[idx..])
+}
+
+fn remove_dir_all(path: &Path) -> std::io::Result<()> {
+    fs::remove_dir_all(path)
 }

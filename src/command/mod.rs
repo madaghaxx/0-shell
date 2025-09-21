@@ -1,18 +1,24 @@
-pub struct Command;
+pub mod rm;
+pub mod cp;
+pub mod mv;
+pub mod pwd;
+mod util;
 
-impl Command {
-    pub fn rm(args: &[&str]) {
-        rm::rm(args);
-    }
+type CmdFn = fn(&[&str]);
 
-    pub fn cp(args: &[&str]) {
-        cp::cp(args);
+const COMMANDS: &[(&str, CmdFn)] = &[
+    ("rm", rm::rm),
+    ("cp", cp::cp),
+    ("mv", mv::mv),
+    ("pwd", |_| pwd::pwd()),
+];
+
+pub fn dispatch(name: &str, args: &[&str]) -> bool {
+    for (n, f) in COMMANDS {
+        if *n == name {
+            f(args);
+            return true;
+        }
     }
-    pub fn mv(args: &[&str]) {
-        mv::mv(args);
-    }
+    false
 }
-
-mod rm;
-mod cp;
-mod mv;
